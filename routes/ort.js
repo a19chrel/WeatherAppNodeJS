@@ -3,7 +3,7 @@ const router = require('express').Router();
 
 router.get('/:ort', (req, res) => {
     // Get ort
-    return res.status(400).json({
+    return res.json({
         "name": "Grums",
         "type": "Administration centre",
         "country": "Sweden",

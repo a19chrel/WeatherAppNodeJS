@@ -102,7 +102,7 @@ router.get('/:ort', (req, res) => {
         }
     ];
 
-    return res.status(400).json(data);
+    return res.json(data);
 });
 
 router.get('/:ort/:date', (req, res) => {
