@@ -1,28 +1,37 @@
 const router = require('express').Router();
-
+const db = require('../dbconnect')
 router.get('/', (req, res) => {
     // Get users
-    return res.status(500).send("This service does not exists yet");
+    db.all(`select * from user`, (err, row) => {
+        if (err) {
+            return res.status(500).send(err.message);
+        } else {
+            return res.json(row);
+        }
+    });
 });
 
 router.post('/', (req, res) => {
     // Create user
-    return res.status(500).send("This service does not exists yet");
+    db.run("insert into user(id, username, email) values(?, ?, ?)", [req.body.id, req.body.username, req.body.email], (err, rows)=>{
+        if (err) {
+            return res.status(500).send(err.message);
+        } else {
+            return res.send(`User ${req.body.username} has been created!`);
+        }
+    });
 });
 
 router.get('/:user', (req, res) => {
     // Get user
-    return res.status(500).send("This service does not exists yet");
+    db.all(`select * from user where "username" = "${req.params.user}"`, (err, row) => {
+        if (err) {
+            return res.status(500).send(err.message);
+        } else {
+            return res.json(row);
+        }
+    });
 });
 
-router.put('/:user', (req, res) => {
-    // Update user
-    return res.status(500).send("This service does not exists yet");
-});
-
-router.delete('/:user', (req, res) => {
-    // Remove user
-    return res.status(500).send("This service does not exists yet");
-});
 
 module.exports = router;
