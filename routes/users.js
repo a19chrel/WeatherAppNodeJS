@@ -2,35 +2,48 @@ const router = require('express').Router();
 const db = require('../dbconnect')
 router.get('/', (req, res) => {
     // Get users
-    db.all(`select * from user`, (err, row) => {
+    const mongo = db.getDb();
+    mongo.collection("users").find().toArray(function (err, result) {
         if (err) {
-            return res.status(500).send(err.message);
+            console.log(err)
         } else {
-            return res.json(row);
+            res.status(200).send(result);
         }
     });
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     // Create user
-    db.run("insert into user(id, username, email) values(?, ?, ?)", [req.body.id, req.body.username, req.body.email], (err, rows)=>{
-        if (err) {
-            return res.status(500).send(err.message);
-        } else {
-            return res.send(`User ${req.body.username} has been created!`);
-        }
+    const mongo = db.getDb();
+    const collection = mongo.collection("users");
+
+    const idExists = await collection.findOne({id: req.body.id});
+    if (idExists) return res.status(500).send("There is already an user with that id.");
+
+    const usernameExists = await collection.findOne({username: req.body.username});
+    if (usernameExists) return res.status(500).send("There is already an user with that username.");
+
+    const emailExists = await collection.findOne({email: req.body.email});
+    if (emailExists) return res.status(500).send("There is already an user with that email.");
+
+    const user = await collection.insertOne({
+        id: req.body.id,
+        username: req.body.username,
+        email: req.body.email
     });
+
+    if (!user) return res.status(500).send("That user could not be added.");
+    else return res.json(user);
 });
 
-router.get('/:user', (req, res) => {
+router.get('/:user', async (req, res) => {
     // Get user
-    db.all(`select * from user where "username" = "${req.params.user}"`, (err, row) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        } else {
-            return res.json(row);
-        }
-    });
+    const mongo = db.getDb();
+    const collection = mongo.collection("users");
+    const user = await collection.findOne({username: req.params.user});
+
+    if (!user) return res.status(500).send("That user does not exists");
+    else return res.json(user);
 });
 
 

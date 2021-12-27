@@ -4,6 +4,7 @@ require('dotenv').config();
 const https = require("https");
 const fs = require("fs");
 const cors = require("cors");
+const db = require("./dbconnect");
 
 var certOptions;
 
@@ -39,6 +40,17 @@ if (fs.existsSync(process.env.CERT_PATH + "privkey.pem") && fs.existsSync(proces
         cert: fs.readFileSync(process.env.CERT_PATH + "cert.pem")
     }
 }
+
+/* Init database connection */
+db.connectToServer(function (err) {
+    if (err) {
+        console.error(err);
+        process.exit();
+    }
+
+    // Do stuff ... for example
+    // start the Express server
+});
 
 if (typeof certOptions !== 'undefined') {
     https.createServer(certOptions, app).listen(3002, () => console.log('HTTPS server started! Listening on port 3002'));

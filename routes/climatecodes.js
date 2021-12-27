@@ -2,13 +2,15 @@ const router = require('express').Router();
 const db = require('../dbconnect');
 
 router.get('/', (req, res) => {
-    db.all(`select * from climatecodes`, (err, row) => {
+    const mongo = db.getDb();
+    mongo.collection("climatecodes").find().toArray(function (err, result) {
         if (err) {
-            return res.status(500).send(err.message);
+            console.log(err)
         } else {
-            return res.json(row);
+            res.status(200).send(result);
         }
     });
+
 });
 
 module.exports = router;

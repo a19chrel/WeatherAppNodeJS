@@ -1,26 +1,26 @@
 const router = require('express').Router();
 const db = require('../dbconnect');
 
-router.get('/:ort', (req, res) => {
+router.get('/:ort', async (req, res) => {
     // Get forecasts for ort
-    db.all(`select * from forecast where "name" = "${req.params.ort}"`, (err, row) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        } else {
-            return res.json(row);
-        }
-    });
+    const mongo = db.getDb();
+    const collection = mongo.collection("forecasts");
+    const forecasts = await collection.find({name: req.params.ort}).toArray();
+
+    if (!forecasts) return res.status(500).send("There is no forecasts for that location!");
+    else return res.json(forecasts);
+
 });
 
-router.get('/:ort/:date', (req, res) => {
+router.get('/:ort/:date', async (req, res) => {
     // Get forecasts for ort and date
-    db.all(`select * from forecast where "name" = "${req.params.ort}" AND fromtime LIKE "${req.params.date}%"`, (err, row) => {
-        if (err) {
-            return res.status(500).send(err.message);
-        } else {
-            return res.json(row);
-        }
-    });
+    const mongo = db.getDb();
+    const collection = mongo.collection("forecasts");
+    const forecasts = await collection.find({name: req.params.ort, fromtime: new RegExp(req.params.date) }).toArray();
+
+    if (!forecasts) return res.status(500).send("There is no forecasts for that location!");
+    else return res.json(forecasts);
+
 });
 
 module.exports = router;

@@ -1,12 +1,29 @@
-const sqlite3 = require('sqlite3').verbose();
+require('dotenv').config();
+const { MongoClient } = require('mongodb');
 
-let db = new sqlite3.Database('./weather.db', (err)=>{
-    if(err){
-        console.log(err.message)
-    }
-    else{
-        console.log("connected to db");
-    }
-})
+const connectionString = process.env.ATLAS_URI;
+const client = new MongoClient(connectionString, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
 
-module.exports = db;
+let dbConnection;
+
+module.exports = {
+    connectToServer: function (callback) {
+        client.connect(function (err, db) {
+            if (err || !db) {
+                return callback(err);
+            }
+
+            dbConnection = db.db(process.env.DATABASE_NAME);
+            console.log('Successfully connected to MongoDB.');
+
+            return callback();
+        });
+    },
+
+    getDb: function () {
+        return dbConnection;
+    },
+};
